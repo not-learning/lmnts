@@ -1,6 +1,6 @@
 package lmnts
 
-// ### Zero (or unset) size is autosize.
+// ### Zero (or not set) size is autosize.
 
 func (el *Lmnt) GapsBetween(size float32, lls ...*Lmnt) {
 	for i, k := range lls {
