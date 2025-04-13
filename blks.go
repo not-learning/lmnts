@@ -88,7 +88,7 @@ func (el *Lmnt) AddTB(tS, bS float32, ll *Lmnt) {
 
 func (el *Lmnt) AddLR(lS, rS float32, ll *Lmnt) {
 	padL, padR := New(), New()
-	padL.h, padR.h = lS, rS
+	padL.w, padR.w = lS, rS
 	if el.row {
 		el.Add(padL, ll, padR)
 	} else {
