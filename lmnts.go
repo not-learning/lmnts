@@ -59,7 +59,6 @@ func New() *Lmnt {
 	return &Lmnt{
 		size:   &size{},
 		rect:   &rect{&point{}, &point{}},
-		//Font:   &Font{face: &text.GoTextFace{Source: loadFont()}}, // TODO: Init to load fonts
 		layout: newLayout(),
 	}
 }
@@ -193,12 +192,12 @@ func (el *Lmnt) setRow() {
 	}
 }
 
-func setRect(el *Lmnt) {
+func setRects(el *Lmnt) {
 	if el.kids == nil { return }
 	if el.row { el.setRow() } else { el.setClm() }
 }
 
 func (el *Lmnt) DoAll() {
 	el.WalkUp(setTotals)
-	el.WalkDown(setRect)
+	el.WalkDown(setRects)
 }
