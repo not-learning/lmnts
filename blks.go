@@ -57,6 +57,7 @@ func (el *Lmnt) AddL(size float32, ll *Lmnt) {
 		el.Add(pad, ll)
 	} else {
 		inL := New()
+		inL.SetRow()
 		inL.Add(pad, ll)
 		el.Add(inL)
 	}
@@ -69,6 +70,7 @@ func (el *Lmnt) AddR(size float32, ll *Lmnt) {
 		el.Add(ll, pad)
 	} else {
 		inL := New()
+		inL.SetRow()
 		inL.Add(ll, pad)
 		el.Add(inL)
 	}
@@ -93,6 +95,7 @@ func (el *Lmnt) AddLR(lS, rS float32, ll *Lmnt) {
 		el.Add(padL, ll, padR)
 	} else {
 		inL := New()
+		inL.SetRow()
 		inL.Add(padL, ll, padR)
 		el.Add(inL)
 	}
