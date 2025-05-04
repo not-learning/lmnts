@@ -2,6 +2,10 @@ package lmnts
 
 // ### Zero (or not set) size is autosize.
 // TODO Gaps and friends arrange their kids?
+// TODO think: upon Adding any Pad, Size (if smaller) makes no sense.
+// TODO make tests
+
+import "math"
 
 func (el *Lmnt) GapsBetween(size float32, lls ...*Lmnt) {
 	for i, k := range lls {
@@ -14,6 +18,7 @@ func (el *Lmnt) GapsBetween(size float32, lls ...*Lmnt) {
 	}
 }//*/
 
+// todo: test!
 func (el *Lmnt) GapsAround(size float32, lls ...*Lmnt) {
 	gap1, gap2 := New(), New()
 	if el.row {
@@ -24,6 +29,23 @@ func (el *Lmnt) GapsAround(size float32, lls ...*Lmnt) {
 	el.Add(gap1)
 	el.GapsBetween(size, lls...)
 	el.Add(gap2)
+}
+
+// todo 0 size for auto-arrange?
+// todo center last row?
+func (el *Lmnt) Grid(num int, gap float32, lls ...*Lmnt) {
+	if len(el.kids) != 0 { return }
+	n := len(lls) / num
+	if n*num < len(lls) { n++ }
+
+	in := make([]*Lmnt, n)
+	for i := range n {
+		in[i] = New()
+		if !el.row { in[i].SetRow() }
+		a := int(math.Min(float64((i+1)*num), float64(len(lls))))
+		in[i].GapsBetween(gap, lls[i*num:a]...)
+	}
+	el.GapsBetween(gap, in...)
 }
 
 func (el *Lmnt) AddT(size float32, ll *Lmnt) {

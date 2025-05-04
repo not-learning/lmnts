@@ -44,6 +44,8 @@ func newLayout() *layout {
 	return &layout{total: &size{}}
 }
 
+func (el *Lmnt) Row() bool { return el.row }
+
 func (el *Lmnt) SetRow() { el.row = true }
 
 // ### The Lmnt ###
