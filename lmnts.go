@@ -2,7 +2,7 @@ package lmnts
 
 import (
 	"cmp"
-	//"slices"
+	"slices"
 )
 
 // TODO relative sizes
@@ -73,19 +73,15 @@ func (el *Lmnt) Add(lls ...*Lmnt) {
 
 // todo: might be slow?
 func (el *Lmnt) IsAdded(ll *Lmnt) bool {
-	if *el.kids == nil {
-		return false
-	}
+	if *el.kids == nil { return false }
 	for _, v := range *el.kids {
-		if v == ll {
-			return true
-		}
+		if v == ll { return true }
 	}
 	return false
 }
 
-// todo: doesn't work :()
-/*func (el *Lmnt) Del(ll *Lmnt) {
+// todo: check with kids as non-pointer
+func (el *Lmnt) Del(ll *Lmnt) {
 	*el.kids = slices.DeleteFunc(*el.kids, func(l *Lmnt) bool {
 		return ll == l
 	})
