@@ -1,8 +1,8 @@
 package lmnts
 
-import (//"fmt"
+import (
 	"cmp"
-	"slices"
+	//"slices"
 )
 
 // TODO relative sizes
@@ -34,14 +34,17 @@ func (el *Lmnt) SetRect(x1, y1, x2, y2 float32) {
 }
 
 type layout struct {
-	row   bool
+	row bool
 	//name  string
 	total *size
-	kids  []*Lmnt
+	kids  *[]*Lmnt
 }
 
 func newLayout() *layout {
-	return &layout{total: &size{}}
+	return &layout{
+		total: &size{},
+		kids: &[]*Lmnt{},
+	}
 }
 
 func (el *Lmnt) Row() bool { return el.row }
@@ -53,7 +56,6 @@ type Lmnt struct {
 	Name string
 	*size
 	*rect
-	//*Font
 	*layout
 }
 
@@ -66,32 +68,45 @@ func New() *Lmnt {
 }
 
 func (el *Lmnt) Add(lls ...*Lmnt) {
-	for _, v := range lls {
-		el.kids = append(el.kids, v)
-	}
+	*el.kids = append(*el.kids, lls...)
 }
 
-func (el *Lmnt) Del(lls ...*Lmnt) {
-	for _, v := range lls {
-		el.kids = slices.DeleteFunc(el.kids, func(l *Lmnt) bool {
-			return v == l
-		})
+// todo: might be slow?
+func (el *Lmnt) IsAdded(ll *Lmnt) bool {
+	if *el.kids == nil {
+		return false
 	}
+	for _, v := range *el.kids {
+		if v == ll {
+			return true
+		}
+	}
+	return false
 }
+
+// todo: doesn't work :()
+/*func (el *Lmnt) Del(ll *Lmnt) {
+	*el.kids = slices.DeleteFunc(*el.kids, func(l *Lmnt) bool {
+		return ll == l
+	})
+}//*/
 
 func (el *Lmnt) Clear() {
-	el.kids = []*Lmnt{}
+	a := []*Lmnt{}
+	el.kids = &a
 }
 
 func (el *Lmnt) WalkDown(fn func(*Lmnt)) {
+	// runtime.Breakpoint()
 	fn(el)
-	for _, ll := range el.kids {
+	for _, ll := range *el.kids {
 		ll.WalkDown(fn)
 	}
 }
 
 func (el *Lmnt) WalkUp(fn func(*Lmnt)) {
-	for _, ll := range el.kids {
+	// runtime.Breakpoint()
+	for _, ll := range *el.kids {
 		ll.WalkUp(fn)
 	}
 	fn(el)
@@ -100,7 +115,7 @@ func (el *Lmnt) WalkUp(fn func(*Lmnt)) {
 // ### The Mechanism
 func setTotals(el *Lmnt) {
 	el.total.w, el.total.h = 0, 0
-	for _, ll := range el.kids {
+	for _, ll := range *el.kids {
 		mw, mh := myMax(ll.w, ll.total.w), myMax(ll.h, ll.total.h)
 		if el.row {
 			el.total.w += mw
@@ -121,7 +136,9 @@ func sizesList(fs, n float32, sl, st []float32) []float32 {
 				sl[i] = st[i]
 				fs -= st[i]
 				st[i] = 0
-				if n > 1 { n-- } // todo: is this really necessary?
+				if n > 1 {
+					n--
+				} // todo: is this really necessary?
 				delta = fs / n
 				done = false
 			}
@@ -139,15 +156,17 @@ func sizesList(fs, n float32, sl, st []float32) []float32 {
 }
 
 func (el *Lmnt) setClm() {
-	fs := myMax(el.p2.y - el.p1.y, el.total.h)
-	n := float32(len(el.kids))
-	sl := make([]float32, len(el.kids))
-	st := make([]float32, len(el.kids))
-	for i, v := range el.kids {
+	fs := myMax(el.p2.y-el.p1.y, el.total.h)
+	n := float32(len(*el.kids))
+	sl := make([]float32, len(*el.kids))
+	st := make([]float32, len(*el.kids))
+	for i, v := range *el.kids {
 		if v.h > 0 {
 			sl[i] = v.h
 			fs -= v.h
-			if n > 1 { n-- } // todo: is this really necessary?
+			if n > 1 {
+				n--
+			} // todo: is this really necessary?
 		} else {
 			st[i] = v.total.h
 		}
@@ -156,7 +175,7 @@ func (el *Lmnt) setClm() {
 	hl := sizesList(fs, n, sl, st)
 	w := myMax(el.p2.x-el.p1.x, el.total.w)
 	dy := el.p1.y
-	for i, v := range el.kids {
+	for i, v := range *el.kids {
 		v.p1.x = el.p1.x
 		v.p2.x = v.p1.x + cmp.Or(v.w, w)
 		v.p1.y = dy
@@ -166,15 +185,17 @@ func (el *Lmnt) setClm() {
 }
 
 func (el *Lmnt) setRow() {
-	fs := myMax(el.p2.x - el.p1.x, el.total.w)
-	n := float32(len(el.kids))
-	sl := make([]float32, len(el.kids))
-	st := make([]float32, len(el.kids))
-	for i, v := range el.kids {
+	fs := myMax(el.p2.x-el.p1.x, el.total.w)
+	n := float32(len(*el.kids))
+	sl := make([]float32, len(*el.kids))
+	st := make([]float32, len(*el.kids))
+	for i, v := range *el.kids {
 		if v.w > 0 {
 			sl[i] = v.w
 			fs -= v.w
-			if n > 1 { n-- } // todo: is this really necessary?
+			if n > 1 {
+				n--
+			} // todo: is this really necessary?
 		} else {
 			st[i] = v.total.w
 		}
@@ -184,7 +205,7 @@ func (el *Lmnt) setRow() {
 	h := myMax(el.p2.y-el.p1.y, el.total.h)
 	dx := el.p1.x
 
-	for i, v := range el.kids {
+	for i, v := range *el.kids {
 		v.p1.y = el.p1.y
 		v.p2.y = v.p1.y + cmp.Or(v.h, h)
 
@@ -195,8 +216,14 @@ func (el *Lmnt) setRow() {
 }
 
 func setRects(el *Lmnt) {
-	if el.kids == nil { return }
-	if el.row { el.setRow() } else { el.setClm() }
+	if *el.kids == nil {
+		return
+	}
+	if el.row {
+		el.setRow()
+	} else {
+		el.setClm()
+	}
 }
 
 func (el *Lmnt) DoAll() {
