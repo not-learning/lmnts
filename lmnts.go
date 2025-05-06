@@ -2,6 +2,7 @@ package lmnts
 
 import (
 	"cmp"
+	"log"
 	"slices"
 )
 
@@ -37,14 +38,11 @@ type layout struct {
 	row bool
 	//name  string
 	total *size
-	kids  *[]*Lmnt
+	kids  []*Lmnt
 }
 
 func newLayout() *layout {
-	return &layout{
-		total: &size{},
-		kids: &[]*Lmnt{},
-	}
+	return &layout{ total: &size{} }
 }
 
 func (el *Lmnt) Row() bool { return el.row }
@@ -68,13 +66,25 @@ func New() *Lmnt {
 }
 
 func (el *Lmnt) Add(lls ...*Lmnt) {
-	*el.kids = append(*el.kids, lls...)
+	el.kids = append(el.kids, lls...)
 }
+
+func (el *Lmnt) AddN(n int, lls ...*Lmnt) {
+	l := len(el.kids)
+	if n > l {
+		log.Println("AddN: index out of bounds")
+	}
+	if n < 0 { n += l+1 }
+	if n < 0 {
+		log.Println("AddN: index out of bounds")
+	}
+	el.kids = slices.Insert(el.kids, n, lls...)
+}//*/
 
 // todo: might be slow?
 func (el *Lmnt) IsAdded(ll *Lmnt) bool {
-	if *el.kids == nil { return false }
-	for _, v := range *el.kids {
+	if el.kids == nil { return false }
+	for _, v := range el.kids {
 		if v == ll { return true }
 	}
 	return false
@@ -82,27 +92,27 @@ func (el *Lmnt) IsAdded(ll *Lmnt) bool {
 
 // todo: check with kids as non-pointer
 func (el *Lmnt) Del(ll *Lmnt) {
-	*el.kids = slices.DeleteFunc(*el.kids, func(l *Lmnt) bool {
+	el.kids = slices.DeleteFunc(el.kids, func(l *Lmnt) bool {
 		return ll == l
 	})
 }//*/
 
 func (el *Lmnt) Clear() {
-	a := []*Lmnt{}
-	el.kids = &a
+	//a := []*Lmnt{}
+	el.kids = nil
 }
 
 func (el *Lmnt) WalkDown(fn func(*Lmnt)) {
 	// runtime.Breakpoint()
 	fn(el)
-	for _, ll := range *el.kids {
+	for _, ll := range el.kids {
 		ll.WalkDown(fn)
 	}
 }
 
 func (el *Lmnt) WalkUp(fn func(*Lmnt)) {
 	// runtime.Breakpoint()
-	for _, ll := range *el.kids {
+	for _, ll := range el.kids {
 		ll.WalkUp(fn)
 	}
 	fn(el)
@@ -111,7 +121,7 @@ func (el *Lmnt) WalkUp(fn func(*Lmnt)) {
 // ### The Mechanism
 func setTotals(el *Lmnt) {
 	el.total.w, el.total.h = 0, 0
-	for _, ll := range *el.kids {
+	for _, ll := range el.kids {
 		mw, mh := myMax(ll.w, ll.total.w), myMax(ll.h, ll.total.h)
 		if el.row {
 			el.total.w += mw
@@ -153,10 +163,10 @@ func sizesList(fs, n float32, sl, st []float32) []float32 {
 
 func (el *Lmnt) setClm() {
 	fs := myMax(el.p2.y-el.p1.y, el.total.h)
-	n := float32(len(*el.kids))
-	sl := make([]float32, len(*el.kids))
-	st := make([]float32, len(*el.kids))
-	for i, v := range *el.kids {
+	n := float32(len(el.kids))
+	sl := make([]float32, len(el.kids))
+	st := make([]float32, len(el.kids))
+	for i, v := range el.kids {
 		if v.h > 0 {
 			sl[i] = v.h
 			fs -= v.h
@@ -171,7 +181,7 @@ func (el *Lmnt) setClm() {
 	hl := sizesList(fs, n, sl, st)
 	w := myMax(el.p2.x-el.p1.x, el.total.w)
 	dy := el.p1.y
-	for i, v := range *el.kids {
+	for i, v := range el.kids {
 		v.p1.x = el.p1.x
 		v.p2.x = v.p1.x + cmp.Or(v.w, w)
 		v.p1.y = dy
@@ -182,10 +192,10 @@ func (el *Lmnt) setClm() {
 
 func (el *Lmnt) setRow() {
 	fs := myMax(el.p2.x-el.p1.x, el.total.w)
-	n := float32(len(*el.kids))
-	sl := make([]float32, len(*el.kids))
-	st := make([]float32, len(*el.kids))
-	for i, v := range *el.kids {
+	n := float32(len(el.kids))
+	sl := make([]float32, len(el.kids))
+	st := make([]float32, len(el.kids))
+	for i, v := range el.kids {
 		if v.w > 0 {
 			sl[i] = v.w
 			fs -= v.w
@@ -201,7 +211,7 @@ func (el *Lmnt) setRow() {
 	h := myMax(el.p2.y-el.p1.y, el.total.h)
 	dx := el.p1.x
 
-	for i, v := range *el.kids {
+	for i, v := range el.kids {
 		v.p1.y = el.p1.y
 		v.p2.y = v.p1.y + cmp.Or(v.h, h)
 
@@ -212,7 +222,7 @@ func (el *Lmnt) setRow() {
 }
 
 func setRects(el *Lmnt) {
-	if *el.kids == nil {
+	if el.kids == nil {
 		return
 	}
 	if el.row {

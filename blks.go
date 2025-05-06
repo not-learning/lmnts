@@ -35,7 +35,7 @@ func (el *Lmnt) GapsAround(size float32, lls ...*Lmnt) {
 // todo 0 size for auto-arrange?
 // todo center last row?
 func (el *Lmnt) Grid(num int, gap float32, lls ...*Lmnt) {
-	if len(*el.kids) != 0 { return }
+	if len(el.kids) != 0 { return }
 	n := len(lls) / num
 	if n*num < len(lls) { n++ }
 
