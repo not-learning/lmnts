@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-const startW, startH float32 = 450, 1000
+//const startW, startH float32 = 450, 1000
 var scrW, scrH int
 var ratW, ratH float32 = 1, 1
 
@@ -74,11 +74,10 @@ func New() *Lmnt {
 	}
 }
 
-func (el *Lmnt) Update(w, h int) {
+func (el *Lmnt) Update(w, h int, rW, rH float32) {
 	if scrW == w && scrH == h { return }
 	scrW, scrH = w, h
-	ratW = float32(scrW) / startW
-	ratH = float32(scrH) / startH
+	ratW, ratH = rW, rH
 	el.DoAll()
 }
 
