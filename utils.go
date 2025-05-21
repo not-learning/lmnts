@@ -12,6 +12,16 @@ func myMax[T cmp.Ordered](nn ...T) T {
 	return mx
 }
 
+func myMin[T cmp.Ordered](nn ...T) T {
+	mx := nn[0]
+	for _, v := range nn {
+		if mx > v {
+			mx = v
+		}
+	}
+	return mx
+}
+
 func (el *Lmnt) MidF32() (mx, my float32) {
 	x1, y1, x2, y2 := el.Rect()
 	mx = x1 + (x2-x1)/2
