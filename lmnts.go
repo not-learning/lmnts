@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-// TODO relative sizes
+// TODO scaling sizes
 // TODO: think: 0 for 0 size, -1 for autosize
 type size struct{ w, h float32 }
 
@@ -36,13 +36,8 @@ func (el *Lmnt) SetRect(x1, y1, x2, y2 float32) {
 
 type layout struct {
 	row bool
-	//name  string
 	total *size
 	kids  []*Lmnt
-}
-
-func newLayout() *layout {
-	return &layout{ total: &size{} }
 }
 
 func (el *Lmnt) Row() bool { return el.row }
@@ -61,7 +56,7 @@ func New() *Lmnt {
 	return &Lmnt{
 		size:   &size{},
 		rect:   &rect{&point{}, &point{}},
-		layout: newLayout(),
+		layout: &layout{total: &size{}},
 	}
 }
 
@@ -81,7 +76,6 @@ func (el *Lmnt) AddN(n int, lls ...*Lmnt) {
 	el.kids = slices.Insert(el.kids, n, lls...)
 }//*/
 
-// todo: might be slow?
 func (el *Lmnt) IsAdded(ll *Lmnt) bool {
 	if el.kids == nil { return false }
 	for _, v := range el.kids {
@@ -90,7 +84,6 @@ func (el *Lmnt) IsAdded(ll *Lmnt) bool {
 	return false
 }
 
-// todo: check with kids as non-pointer
 func (el *Lmnt) Del(ll *Lmnt) {
 	el.kids = slices.DeleteFunc(el.kids, func(l *Lmnt) bool {
 		return ll == l
@@ -98,12 +91,10 @@ func (el *Lmnt) Del(ll *Lmnt) {
 }//*/
 
 func (el *Lmnt) Clear() {
-	//a := []*Lmnt{}
 	el.kids = nil
 }
 
 func (el *Lmnt) WalkDown(fn func(*Lmnt)) {
-	// runtime.Breakpoint()
 	fn(el)
 	for _, ll := range el.kids {
 		ll.WalkDown(fn)
@@ -111,7 +102,6 @@ func (el *Lmnt) WalkDown(fn func(*Lmnt)) {
 }
 
 func (el *Lmnt) WalkUp(fn func(*Lmnt)) {
-	// runtime.Breakpoint()
 	for _, ll := range el.kids {
 		ll.WalkUp(fn)
 	}
